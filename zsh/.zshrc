@@ -71,13 +71,22 @@ ZSH_THEME="robbyrussell"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git
-zsh-autosuggestions
-zsh-syntax-highlighting 
-zsh-vim-mode 
-zsh-history-substring-search)
+plugins=(git)
 
-source $ZSH/oh-my-zsh.sh
+for plugin in \
+    zsh-autosuggestions \
+    zsh-syntax-highlighting \
+    zsh-vim-mode \
+    zsh-history-substring-search
+do
+    if [ -d "${ZSH_CUSTOM:-$ZSH/custom}/plugins/$plugin" ]; then
+        plugins+=("$plugin")
+    fi
+done
+
+if [ -r "$ZSH/oh-my-zsh.sh" ]; then
+    source "$ZSH/oh-my-zsh.sh"
+fi
 
 # User configuration
 
@@ -107,24 +116,32 @@ source $ZSH/oh-my-zsh.sh
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/Users/hadiji/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+__conda_setup="$('$HOME/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
-    if [ -f "/Users/hadiji/anaconda3/etc/profile.d/conda.sh" ]; then
-        . "/Users/hadiji/anaconda3/etc/profile.d/conda.sh"
+    if [ -f "$HOME/anaconda3/etc/profile.d/conda.sh" ]; then
+        . "$HOME/anaconda3/etc/profile.d/conda.sh"
     else
-        export PATH="/Users/hadiji/anaconda3/bin:$PATH"
+        if [ -d "$HOME/anaconda3/bin" ]; then
+            export PATH="$HOME/anaconda3/bin:$PATH"
+        fi
     fi
 fi
 unset __conda_setup
 # <<< conda initialize <<<
 
-export PATH="/opt/homebrew/bin:$PATH"
+if [ -d "/opt/homebrew/bin" ]; then
+    export PATH="/opt/homebrew/bin:$PATH"
+fi
 
 
-bindkey -M vicmd "k" history-substring-search-up
-bindkey -M vicmd "j" history-substring-search-down
+if (( $+widgets[history-substring-search-up] )); then
+    bindkey -M vicmd "k" history-substring-search-up
+fi
+if (( $+widgets[history-substring-search-down] )); then
+    bindkey -M vicmd "j" history-substring-search-down
+fi
 bindkey -s "^F" " fg^M ^M"
 bindkey -s "^@" "^M"
 bindkey jk vi-cmd-mode
@@ -141,4 +158,6 @@ setopt HIST_SAVE_NO_DUPS
 # alias sed=gsed
 
 # Added by Hugging Face CLI installer
-export PATH="/Users/hadiji/.local/bin:$PATH"
+if [ -d "$HOME/.local/bin" ]; then
+    export PATH="$HOME/.local/bin:$PATH"
+fi
