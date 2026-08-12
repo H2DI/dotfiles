@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Block commits whose staged additions look like a real secret assignment.
+# Generic detection only — no provider-specific strings, so this file leaks
+# nothing about which services are used. GitHub Push Protection is the
+# server-side backstop for known credential formats.
+set -euo pipefail
+
+# Key names that suggest a secret.
+key='(secret|token|passwd|password|api[_-]?key|access[_-]?key([_-]?id)?|private[_-]?key|credential)'
+# Obvious placeholders that are not real secrets.
+placeholder='replace-me|replaceme|changeme|example|your[_-]|xxxx|<[^>]*>|\.\.\.'
+
+# Staged additions, excluding this hook and *.example templates.
+added="$(git diff --cached -U0 --no-color --diff-filter=AM \
+  -- . ':(exclude)hooks/pre-commit' ':(exclude)*.example' \
+  | grep -E '^[+]' | grep -vE '^[+]{3}' || true)"
+
+# A secret-ish key assigned to a quoted, non-placeholder value (6+ chars),
+# plus generic PEM private-key block headers.
+hits="$(printf '%s\n' "$added" \
+  | grep -inE "${key}[[:space:]]*[:=][[:space:]]*['\"][^'\"]{6,}" \
+  | grep -viE "$placeholder" || true)"
+hits="$hits$(printf '%s\n' "$added" | grep -nE 'BEGIN[A-Z ]*PRIVATE KEY' || true)"
+
+if [ -n "$hits" ]; then
+  echo "pre-commit BLOCKED: staged change looks like a secret." >&2
+  echo "Move it to ~/.shell_local. False positive? git commit --no-verify" >&2
+  printf '%s\n' "$hits" >&2
+  exit 1
+fi

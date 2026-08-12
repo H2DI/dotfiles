@@ -1,0 +1,14 @@
+[checkout]
+	workers = 16
+[core]
+	untrackedCache = true
+	checkstat = minimal
+	editor = vim
+[alias]
+	lb = for-each-ref --sort=committerdate refs/heads/ --format=\"%(refname:short) %(committerdate:relative)\"
+# Machine-local identity, signing, credential helper, safe dirs, lfs, difftool.
+# Included last so the local file wins on any conflicting key.
+[include]
+	path = ~/.gitconfig.local
+[safe]
+	directory = /mnt/vast/shared/registry

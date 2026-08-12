@@ -1,0 +1,25 @@
+# Shared environment variables — sourced by both .bashrc and .zshrc
+# Keep this file POSIX-compatible (no bash/zsh-specific syntax)
+# Generic, non-sensitive config only. Machine-local env + secrets live in
+# ~/.shell_local (untracked), sourced at the end of this file.
+
+# Put user-local binaries on PATH:
+#   ~/.local/bin        - user-local binaries and npm --prefix ~/.local installs
+#   ~/node_modules/.bin - local (non-global) npm installs from $HOME
+# Each entry is guarded so re-sourcing the file does not duplicate it.
+case ":$PATH:" in
+    *":$HOME/.local/bin:"*) ;;
+    *) export PATH="$HOME/.local/bin:$PATH" ;;
+esac
+case ":$PATH:" in
+    *":$HOME/node_modules/.bin:"*) ;;
+    *) export PATH="$HOME/node_modules/.bin:$PATH" ;;
+esac
+
+# uv cache must be node-local: NFS home has rpc.statd down -> flock ENOLCK (os error 37)
+export UV_CACHE_DIR=/tmp/uv-cache-$USER
+# prek cache node-local for same NFS-statd reason
+export PREK_HOME=/tmp/prek-$USER
+
+# Machine-local environment + secrets (untracked, per machine).
+[ -f "$HOME/.shell_local" ] && . "$HOME/.shell_local"
