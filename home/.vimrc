@@ -10,6 +10,7 @@ inoremap <silent> <Down> <C-o>gj
 
 nnoremap zz zz8<C-e>
 nnoremap <leader>w :w<return>
+nnoremap <leader>q :q<return>
 
 " Formatting tex
 vnoremap gw =
@@ -29,5 +30,7 @@ noremap <leader>p "+p
 
 " vnoremap p _"p
 
-
 vnoremap // y/<C-r>0<Return>
+
+set relativenumber
+set number
