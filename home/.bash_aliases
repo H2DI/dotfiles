@@ -11,6 +11,9 @@ alias gcm='git commit -m'
 alias gp='git push'
 
 alias sa='source .venv/bin/activate'
+alias vim='nvim'
+
+alias sqh='squeue | grep hedi'
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
